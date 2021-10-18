@@ -1,0 +1,10 @@
+{% extends "_base.html" %}
+{% block title %}{{movie.name}}{% endblock %}}
+
+{% block content %}
+	<a href="{% url 'search' %}">Home</a>
+	<h1>{{movie.name}}</h1>
+	{% for actor in movie.actors.all %}
+	<li><a href="{% url 'actor-detail' actor.slug %}">{{ actor.name }}</a></li>
+	{% endfor %}
+{% endblock %}}

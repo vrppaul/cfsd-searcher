@@ -1,0 +1,35 @@
+{% extends "_base.html" %}
+{% block content %}
+	<h2>Search for a movie or an actor</h2>
+	<form action="/" method="post">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="Search">
+	</form>
+
+	{% if query %}
+
+		<h3>Found results for <i>"{{query}}"</i>:</h3>
+
+		<h4>Movies</h4>
+		{% if movies %}
+			{% for movie in movies %}
+				<li>
+					<a href="{% url 'movie-detail' movie.slug %}">{{ movie.name }}</a>
+				</li>
+			{% endfor %}
+		{% else %}
+			<i>No movies were found.</i>
+		{% endif %}
+
+		<h4>Actors</h4>
+		{% if actors %}
+			{% for actor in actors %}
+				<li><a href="{% url 'actor-detail' actor.slug %}">{{ actor.name }}</a></li>
+			{% endfor %}
+		{% else %}
+			<i>No actors were found.</i>
+		{% endif %}
+
+	{% endif %}
+{% endblock %}

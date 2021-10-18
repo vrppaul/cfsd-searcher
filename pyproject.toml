@@ -1,0 +1,23 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings"
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "**/tests/*",
+    "**/core/*",
+    "**/users/*",
+    "**/migrations/*",
+    "**/manage.py",
+    "**/urls.py",
+    "**/apps.py",
+    "**/admin.py",
+    "**/utils/*",
+    "**/conftest.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "def __str__",
+    "def __repr__",
+]
