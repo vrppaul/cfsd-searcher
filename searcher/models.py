@@ -3,7 +3,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 
-
 MOVIE_NAME_MAX_LENGTH = 1000
 ACTOR_NAME_MAX_LENGTH = 1000
 
@@ -13,6 +12,7 @@ class Movie(models.Model):
     Represents a single movie entity.
     name is not unique, since some movies can potentially have same names.
     """
+
     name = models.CharField(max_length=MOVIE_NAME_MAX_LENGTH)
     slug = models.SlugField(db_index=True)
     actors = models.ManyToManyField("Actor", related_name="movies")
@@ -26,6 +26,7 @@ class Actor(models.Model):
     Represents a single actor entity.
     Has an m2m connection with Movie model.
     """
+
     name = models.CharField(max_length=ACTOR_NAME_MAX_LENGTH, unique=True)
     slug = models.SlugField(unique=True, db_index=True)
 

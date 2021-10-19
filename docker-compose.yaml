@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./searcher:/csfd_searcher/searcher
+      - ./core:/csfd_searcher/core
+    ports:
+      - "8000:8000"
+    container_name: searcher_web

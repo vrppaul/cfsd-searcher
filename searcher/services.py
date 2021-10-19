@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, TypeVar, Type
+from typing import Iterable, Optional, Type, TypeVar
 from urllib.parse import unquote_plus
 
 from django.db import transaction
@@ -33,7 +33,7 @@ def create_movie_with_actors(movie_name: str, actor_names: Iterable[str]) -> Non
     """
     Actor.objects.bulk_create(
         [Actor(name=actor_name, slug=slugify(actor_name)) for actor_name in actor_names],
-        ignore_conflicts=True
+        ignore_conflicts=True,
     )
     actors = Actor.objects.filter(name__in=actor_names)
     movie = Movie.objects.create(name=movie_name)
@@ -66,9 +66,9 @@ def get_entity_by_slug(model: Type[TModel], slug) -> TModel:
     @raise: Http404, if no instance was found.
     """
     try:
-        return model.objects.get(slug=slug)
+        return model.objects.get(slug=slug)  # type: ignore
     except ObjectDoesNotExist:
-        raise Http404(f'No {model.__name__} matches the given slug.')
+        raise Http404(f"No {model.__name__} matches the given slug.")
 
 
 def get_actor_by_slug(slug: str) -> Actor:

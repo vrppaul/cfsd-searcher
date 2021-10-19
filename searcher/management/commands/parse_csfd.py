@@ -1,16 +1,16 @@
 import logging
 from functools import partial
 from multiprocessing.pool import ThreadPool
+from typing import Union
 from urllib.parse import urljoin
 
+import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
-import requests
 from tenacity import Retrying, stop_after_attempt, wait_exponential
 
 from searcher import services
-
 
 REQUEST_HEADERS = {"User-Agent": settings.PARSER_USER_AGENT}
 RETRY_ATTEMPTS = 2
@@ -27,8 +27,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: CommandParser):
         parser.add_argument(
-            "--num-threads", "-n", type=int, default=10,
-            help="Num of threads to simultaneously process movies parsing"
+            "--num-threads",
+            "-n",
+            type=int,
+            default=10,
+            help="Num of threads to simultaneously process movies parsing",
         )
 
     def handle(self, *args, **options):
@@ -60,7 +63,7 @@ def parse_movies_and_actors_to_db(base_url: str, num_threads: int = 10) -> None:
     movie_urls = parse_movie_urls(urljoin(base_url, "/zebricky/filmy/nejlepsi/?showMore=1"))
     parse_movies_and_actors_with_base = partial(parse_movies_with_actors, base_url=base_url)
     with ThreadPool(num_threads) as pool:
-        movies_with_actors = pool.map(parse_movies_and_actors_with_base, movie_urls)
+        movies_with_actors: list = pool.map(parse_movies_and_actors_with_base, movie_urls)
     for movie_name, actor_names in movies_with_actors:
         services.create_movie_with_actors(movie_name, actor_names)
 
@@ -74,9 +77,9 @@ def parse_movie_urls(list_url: str) -> tuple[str, ...]:
     logger.debug("Parsing movies list")
     try:
         for attempt in Retrying(
-                stop=stop_after_attempt(RETRY_ATTEMPTS),
-                wait=wait_exponential(multiplier=1),
-                reraise=True
+            stop=stop_after_attempt(RETRY_ATTEMPTS),
+            wait=wait_exponential(multiplier=1),
+            reraise=True,
         ):
             with attempt:
                 r = requests.get(list_url, headers=REQUEST_HEADERS)
@@ -87,17 +90,17 @@ def parse_movie_urls(list_url: str) -> tuple[str, ...]:
     try:
         soup = lxml_soup(r.text)
         return tuple(
-            element.attrs["href"] for element
-            in soup.find_all("a", class_="film-title-name")
+            element.attrs["href"] for element in soup.find_all("a", class_="film-title-name")
         )
     except KeyError:
         raise CommandError(
-            "Some parsed movies do not have a href attribute. "
-            "Is search by attribute correct?"
+            "Some parsed movies do not have a href attribute. Is search by attribute correct?"
         )
 
 
-def parse_movies_with_actors(movie_url: str, base_url: str) -> tuple[str, tuple[str, ...]]:
+def parse_movies_with_actors(
+    movie_url: str, base_url: str
+) -> Union[tuple[()], tuple[str, tuple[str, ...]]]:
     """
     For a provided movie url, parses its name and actors list.
     @param movie_url: str, relative url of a movie.
@@ -108,22 +111,22 @@ def parse_movies_with_actors(movie_url: str, base_url: str) -> tuple[str, tuple[
 
     try:
         for attempt in Retrying(
-                stop=stop_after_attempt(RETRY_ATTEMPTS),
-                wait=wait_exponential(multiplier=1),
-                reraise=True
+            stop=stop_after_attempt(RETRY_ATTEMPTS),
+            wait=wait_exponential(multiplier=1),
+            reraise=True,
         ):
             with attempt:
                 r = requests.get(urljoin(base_url, movie_url), headers=REQUEST_HEADERS)
                 r.raise_for_status()
     except requests.exceptions.RequestException:
         logger.exception("Couldn't parse a movie with url %s after all attempts", movie_url)
-        return tuple()
+        return ()
 
     try:
         return parse_movies_with_actors_from_html(r.text)
     except AttributeError:
         logger.exception("Movie info parsing failed, some crucial element was not found")
-        return tuple()
+        return ()
 
 
 def parse_movies_with_actors_from_html(html_content: str) -> tuple[str, tuple[str, ...]]:
@@ -136,9 +139,7 @@ def parse_movies_with_actors_from_html(html_content: str) -> tuple[str, tuple[st
     movie_name = soup.find("div", class_="film-header-name").h1.text.strip()
     movie_actors_element = soup.find("h4", string="Hrají: ").parent.find("span")
     all_actors = tuple(
-        actor.get_text() for actor
-        in movie_actors_element.find_all("a", class_=lambda s: s != "more")
+        actor.get_text()
+        for actor in movie_actors_element.find_all("a", class_=lambda s: s != "more")
     )
     return movie_name, all_actors
-
-

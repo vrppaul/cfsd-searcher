@@ -1,10 +1,9 @@
 from http import HTTPStatus
 from typing import Type
 
-from django.http import Http404
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 
 from .factories import ActorFactory, MovieFactory
 
@@ -20,9 +19,9 @@ def test_search_view_without_query(client: Client):
 
 @pytest.mark.django_db
 def test_search_view_with_query(
-        client: Client,
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    client: Client,
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     first_actor = actor_factory(name="first actor")
     second_actor = actor_factory(name="second actor")
@@ -85,9 +84,9 @@ def test_post_search(client: Client):
 
 @pytest.mark.django_db
 def test_get_movie_view(
-        client: Client,
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    client: Client,
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     actors = actor_factory.create_batch(10)
     movie = movie_factory()
@@ -107,9 +106,9 @@ def test_get_movie_view(
 
 @pytest.mark.django_db
 def test_get_actor_view(
-        client: Client,
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    client: Client,
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     actor = actor_factory()
     movies = movie_factory.create_batch(10)
@@ -126,5 +125,3 @@ def test_get_actor_view(
     # Not existing slug
     response = client.get(reverse("actor-detail", args=["some-random-slug"]))
     assert response.status_code == HTTPStatus.NOT_FOUND
-
-

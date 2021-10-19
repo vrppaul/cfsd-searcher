@@ -1,7 +1,7 @@
 from typing import Type
 
-from django.utils.text import slugify
 import pytest
+from django.utils.text import slugify
 
 from .factories import ActorFactory, MovieFactory
 

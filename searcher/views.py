@@ -1,12 +1,11 @@
 from urllib.parse import urlencode
 
-from django.http import HttpResponse, HttpRequest
-from django.shortcuts import redirect, render
-from django.views.generic import FormView, DetailView
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
+from django.views.generic import DetailView, FormView
 
-from . import forms
-from . import services
-from .models import Movie, Actor
+from . import forms, services
+from .models import Actor, Movie
 
 
 class SearchView(FormView):
@@ -14,6 +13,7 @@ class SearchView(FormView):
     Main page, has an input only, if no search query was provided.
     Lists corresponding movies and actors otherwise.
     """
+
     form_class = forms.SearchForm
     template_name = "search.html"
 
@@ -40,6 +40,7 @@ class ActorView(DetailView):
     Single actor info. Shows actor info + movies.
     Correct actor is requested by provided slug.
     """
+
     template_name = "actor.html"
     model = Actor
 
@@ -49,5 +50,6 @@ class MovieView(DetailView):
     Single movie info. Shows movie info + starring actors.
     Correct movie is requested by provided slug.
     """
+
     template_name = "movie.html"
     model = Movie

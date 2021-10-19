@@ -1,12 +1,12 @@
-from typing import Type, Union, Callable
+from typing import Callable, Type, Union
 
 import faker
 import pytest
 from django.http import Http404
 
-from .factories import ActorFactory, MovieFactory
 from searcher import models, services
 
+from .factories import ActorFactory, MovieFactory
 
 fake = faker.Faker()
 
@@ -18,8 +18,8 @@ def test_is_db_empty_empty():
 
 @pytest.mark.django_db
 def test_is_db_empty_not_empty(
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     # Test if some actors and movies exist
     actor_factory.create_batch(3)
@@ -38,8 +38,8 @@ def test_is_db_empty_not_empty(
 
 @pytest.mark.django_db
 def test_clean_db(
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     actor_factory.create_batch(3)
     movie_factory.create_batch(3)
@@ -70,11 +70,11 @@ def test_actors_wont_be_recreated():
 
     services.create_movie_with_actors(
         fake.name(),
-        [f"{i} actor" for i in range(5, 10)] + common_actors
+        [f"{i} actor" for i in range(5, 10)] + common_actors,
     )
     services.create_movie_with_actors(
         fake.name(),
-        [f"{i} actor" for i in range(10, 15)] + common_actors
+        [f"{i} actor" for i in range(10, 15)] + common_actors,
     )
 
     assert models.Movie.objects.count() == 2
@@ -85,8 +85,8 @@ def test_actors_wont_be_recreated():
 
 @pytest.mark.django_db
 def test_get_movies_and_actors_by_query_both_exist(
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     specific_name = "Very Specific and Unique Name"
     specific_actor = actor_factory(name=specific_name)
@@ -103,8 +103,8 @@ def test_get_movies_and_actors_by_query_both_exist(
 
 @pytest.mark.django_db
 def test_get_movies_and_actors_by_query_actor_exist(
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     specific_name = "Very Specific and Unique Name"
     actor_factory(name=specific_name)
@@ -118,8 +118,8 @@ def test_get_movies_and_actors_by_query_actor_exist(
 
 @pytest.mark.django_db
 def test_get_movies_and_actors_by_query_movie_exist(
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     specific_name = "Very Specific and Unique Name"
     actor_factory.create_batch(10)
@@ -132,9 +132,9 @@ def test_get_movies_and_actors_by_query_movie_exist(
 
 
 @pytest.mark.django_db
-def test_get_movies_and_actors_by_query_movie_exist(
-        actor_factory: Type[ActorFactory],
-        movie_factory: Type[MovieFactory]
+def test_get_movies_and_actors_by_query_movie_not_exist(
+    actor_factory: Type[ActorFactory],
+    movie_factory: Type[MovieFactory],
 ):
     actor_factory.create_batch(10)
     movie_factory.create_batch(10)
@@ -146,14 +146,15 @@ def test_get_movies_and_actors_by_query_movie_exist(
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "factory, get_by_slug_method", [
+    "factory, get_by_slug_method",
+    [
         (ActorFactory, services.get_actor_by_slug),
-        (MovieFactory, services.get_movie_by_slug)
-    ]
+        (MovieFactory, services.get_movie_by_slug),
+    ],
 )
 def test_get_model_by_slug(
-        factory: Type[Union[ActorFactory, MovieFactory]],
-        get_by_slug_method: Callable
+    factory: Type[Union[ActorFactory, MovieFactory]],
+    get_by_slug_method: Callable,
 ):
     actor, *_ = factory.create_batch(10)
     found_actor = get_by_slug_method(actor.slug)

@@ -21,3 +21,25 @@ exclude_lines = [
     "def __str__",
     "def __repr__",
 ]
+
+[tool.black]
+line-length = 100
+exclude = """
+/(
+    .git
+  | .mypy_cache
+  | venv
+  | migrations
+)/
+"""
+
+[tool.isort]
+profile = "black"
+src_paths = ["searcher", "core"]
+multi_line_output = 3
+
+[tool.mypy]
+warn_return_any = true
+ignore_missing_imports = true
+python_version = 3.9
+exclude = "migrations"
