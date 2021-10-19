@@ -16,9 +16,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost"]
 
-INTERNAL_IPS = ["127.0.0.1"]
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -146,6 +143,10 @@ LOGGING = {
             "level": "DEBUG",
         },
     },
+}
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
 
 # Configuration for a command to parse the list of movies
