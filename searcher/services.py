@@ -1,12 +1,24 @@
-from typing import Iterable, Optional, Type, TypeVar
+from dataclasses import dataclass
+from typing import Optional, Type, TypeVar
 from urllib.parse import unquote_plus
 
 from django.db import transaction
 from django.db.models import Model, ObjectDoesNotExist, QuerySet
 from django.http import Http404
-from django.utils.text import slugify
 
 from .models import Actor, Movie
+
+
+@dataclass(frozen=True)
+class ActorDTO:
+    name: str
+    csfd_id: str
+
+
+@dataclass(frozen=True)
+class MovieDTO:
+    name: str
+    actors: tuple[ActorDTO, ...]
 
 
 def is_db_empty() -> bool:
@@ -25,18 +37,17 @@ def clean_db() -> None:
 
 
 @transaction.atomic
-def create_movie_with_actors(movie_name: str, actor_names: Iterable[str]) -> None:
+def create_movie_with_actors(movie_dto: MovieDTO) -> None:
     """
     Creates a movie with provided name.
     Creates or fetches (if exist) actors with provided names,
     assigns those actors to the created movie.
     """
-    Actor.objects.bulk_create(
-        [Actor(name=actor_name, slug=slugify(actor_name)) for actor_name in actor_names],
-        ignore_conflicts=True,
-    )
-    actors = Actor.objects.filter(name__in=actor_names)
-    movie = Movie.objects.create(name=movie_name)
+    actors = [
+        Actor.objects.get_or_create(name=actor.name, csfd_id=actor.csfd_id)[0]
+        for actor in movie_dto.actors
+    ]
+    movie = Movie.objects.create(name=movie_dto.name)
     movie.actors.add(*actors)
 
 
