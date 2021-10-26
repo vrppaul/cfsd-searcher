@@ -50,7 +50,10 @@ def test_clean_db(
 
 @pytest.mark.django_db
 def test_create_movie_with_actors_single_movie():
-    services.create_movie_with_actors(fake.name(), [fake.name() for _ in range(10)])
+    movie_dto = services.MovieDTO(
+        fake.name(), tuple(services.ActorDTO(fake.name(), f"{i}") for i in range(10))
+    )
+    services.create_movie_with_actors(movie_dto)
 
     # Test single movie was created with correct data
     assert models.Movie.objects.count() == 1
@@ -66,16 +69,19 @@ def test_create_movie_with_actors_single_movie():
 
 @pytest.mark.django_db
 def test_actors_wont_be_recreated():
-    common_actors = [f"{i} actor" for i in range(5)]
+    common_actors = tuple(services.ActorDTO(fake.name(), f"{i}") for i in range(5))
 
-    services.create_movie_with_actors(
+    first_movie_dto = services.MovieDTO(
         fake.name(),
-        [f"{i} actor" for i in range(5, 10)] + common_actors,
+        tuple(services.ActorDTO(fake.name(), f"{i}") for i in range(5, 10)) + common_actors,
     )
-    services.create_movie_with_actors(
+    services.create_movie_with_actors(first_movie_dto)
+
+    second_movie_dto = services.MovieDTO(
         fake.name(),
-        [f"{i} actor" for i in range(10, 15)] + common_actors,
+        tuple(services.ActorDTO(fake.name(), f"{i}") for i in range(10, 15)) + common_actors,
     )
+    services.create_movie_with_actors(second_movie_dto)
 
     assert models.Movie.objects.count() == 2
     assert models.Actor.objects.count() == 15

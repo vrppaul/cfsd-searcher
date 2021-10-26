@@ -13,3 +13,4 @@ class ActorFactory(factory.django.DjangoModelFactory):
         model = "searcher.Actor"
 
     name = factory.Faker("name")
+    csfd_id = factory.Sequence(lambda n: n)

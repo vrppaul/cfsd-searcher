@@ -9,7 +9,7 @@ from .factories import ActorFactory, MovieFactory
 @pytest.mark.django_db
 def test_correct_actor_slug(actor_factory: Type[ActorFactory]):
     actor = actor_factory()
-    assert actor.slug == slugify(actor.name)
+    assert actor.slug == slugify(f"{actor.pk} {actor.name}")
 
 
 @pytest.mark.django_db
